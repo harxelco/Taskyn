@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Taskyn — Field Operations, Without the Chaos</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+ <div class="logo"><div class="logo-mark">T</div><div><b>Taskyn</b><span>Field operations</span></div></div>
+ <nav class="nav" id="nav">
+  <button class="active" data-v="overview"><i>⌂</i><span>Overview</span></button>
+  <button data-v="dispatch"><i>▶</i><span>Dispatch</span></button>
+  <button data-v="jobs"><i>✓</i><span>Jobs</span></button>
+  <button data-v="schedule"><i>▤</i><span>Schedule</span></button>
+  <button data-v="team"><i>♟</i><span>Team</span></button>
+  <button data-v="customers"><i>☺</i><span>Customers</span></button>
+  <button data-v="issues"><i>!</i><span>Issues</span></button>
+  <button data-v="reports"><i>▥</i><span>Reports</span></button>
+  <button data-v="analytics"><i>▲</i><span>Analytics</span></button>
+  <button data-v="ask"><i>✦</i><span>Ask Taskyn</span></button>
+  <button data-v="worker"><i>◆</i><span>Worker view</span></button>
+ </nav>
+ <div class="workspace" onclick="switchWorkspace()"><strong id="wsname">Crystal Gardens</strong>Demo workspace · Nairobi<br><span id="wsjobs">6 active field jobs</span></div>
+</aside>
+<main>
+ <div class="top">
+  <div><div class="eyebrow" id="eyebrow">Crystal Gardens · Operations</div><h1 id="title">Good morning, Manager</h1><p id="subtitle">Here's what's happening across your field operations today.</p></div>
+  <div class="topright">
+   <button class="secondary" onclick="resetDemo()">Reset demo</button>
+   <div class="iconbtn" onclick="toggleNotif()">🔔<span class="dot"></span></div>
+   <div class="avatar">CG</div>
+  </div>
+ </div>
+ <div class="notifpanel" id="notifpanel"></div>
+
+ <section id="overview" class="view active"></section>
+ <section id="dispatch" class="view"></section>
+ <section id="jobs" class="view"></section>
+ <section id="schedule" class="view"></section>
+ <section id="team" class="view"></section>
+ <section id="customers" class="view"></section>
+ <section id="issues" class="view"></section>
+ <section id="reports" class="view"></section>
+ <section id="analytics" class="view"></section>
+ <section id="ask" class="view"></section>
+ <section id="worker" class="view"></section>
+</main>
+</div>
+
+<div class="modalback" id="modal"><div class="modal" id="modalbody"></div></div>
+<div class="toast" id="toast"></div>
+<script src="script.js"></script>
+</body>
+</html>
