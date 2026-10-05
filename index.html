@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Taskyn — The operating system for businesses that work in the field</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="v4.css">
+<script src="config.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="app">
+<aside class="sidebar" aria-label="Primary">
+ <div class="logo"><div class="logo-mark">T</div><div><b>Taskyn</b><span>Field operations OS</span></div></div>
+ <nav class="nav" id="nav"></nav>
+ <div class="workspace" onclick="switchWorkspace()" role="button" tabindex="0"><strong id="wsname">Crystal Gardens</strong>Demo workspace · Nairobi<br><span id="wsjobs">6 active field jobs</span></div>
+</aside>
+<main id="main">
+ <div class="top">
+  <div><div class="eyebrow" id="eyebrow">Crystal Gardens · Operations</div><h1 id="title">Good morning, Manager</h1><p id="subtitle"></p></div>
+  <div class="topright">
+   <button class="btn btn-secondary" onclick="openPalette()" aria-label="Open command bar"><span data-i="search"></span><span class="hide-sm">Search</span><kbd id="kbd">Ctrl K</kbd></button>
+   <button class="btn btn-ghost iconbtn" onclick="goTo('inbox')" aria-label="Taskyn inbox"><span data-i="bell"></span><span class="dot"></span></button>
+   <div class="avatar" aria-hidden="true">CG</div>
+  </div>
+ </div>
+ <div class="demo-banner">Demonstration data. Financials, GPS positions and benchmarks are simulated and not real.</div>
+ <div class="notifpanel" id="notifpanel"></div>
+ <div id="views"></div>
+ <footer class="hxfoot"><div><b>Want a system like this?</b><span>Harxel Agency can build it for your business.</span></div><a href="#" onclick="goTo('harxel');return false">Book yours today →</a></footer>
+</main>
+</div>
+<nav class="mnav" id="mnav" aria-label="Mobile"></nav>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="More"><div class="sheet-body" id="sheetbody"></div></div>
+<div class="modalback" id="modal" role="dialog" aria-modal="true"><div class="modal" id="modalbody"></div></div>
+<div class="palette" id="palette" role="dialog" aria-modal="true" aria-label="Command bar"><div class="pal-box"><div class="pal-in"><span data-i="search"></span><input id="palq" placeholder="What do you want to do?" autocomplete="off" aria-label="Search actions"></div><div id="pallist" role="listbox"></div></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="script.js"></script>
+<script src="v4.js"></script>
+</body>
+</html>
