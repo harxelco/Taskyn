@@ -1,0 +1,1 @@
+{"name":"Taskyn","short_name":"Taskyn","description":"Field operations OS — offline-capable worker app and manager console","start_url":"./index.html#/worker","scope":"./","display":"standalone","background_color":"#f6f8f6","theme_color":"#1f6b45","icons":[{"src":"assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}

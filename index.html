@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Taskyn — The operating system for businesses that work in the field</title>
+<meta name="description" content="Taskyn V5: smart dispatch, live job tracking, offline worker app, job costing and daily AI briefing for field service businesses.">
+<meta name="theme-color" content="#f6f8f6">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icon.svg">
+<link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<script>try{var m=localStorage.getItem('taskyn.theme');m=m?JSON.parse(m):'auto';var d=m==='dark'||(m==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light'}catch(e){}</script>
+<link rel="stylesheet" href="v5.css">
+<script src="config.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="app" id="app">
+ <aside class="sidebar" id="sidebar" aria-label="Primary">
+  <div class="logo"><div class="logo-mark" aria-hidden="true">T</div><div class="logo-text"><b>Taskyn</b><span>Field operations OS</span></div></div>
+  <nav class="nav" id="nav" aria-label="Main navigation"></nav>
+  <div class="side-foot">
+   <div class="workspace"><strong id="wsname">Crystal Gardens</strong><span>Demo workspace · Nairobi</span><span id="wsjobs"></span></div>
+   <button class="btn btn-ghost collapse" data-act="collapse" aria-label="Collapse sidebar" title="Collapse sidebar"><span data-i="panel"></span><span class="lbl">Collapse</span></button>
+  </div>
+ </aside>
+ <main id="main" tabindex="-1">
+  <header class="top">
+   <div class="top-title"><div class="eyebrow" id="eyebrow">Crystal Gardens</div><h1 id="title">Overview</h1><p id="subtitle"></p></div>
+   <div class="topright">
+    <button class="btn btn-secondary" data-act="palette" aria-label="Open command bar"><span data-i="search"></span><span class="hide-sm">Search</span><kbd id="kbd">Ctrl K</kbd></button>
+    <button class="netchip" id="netchip" hidden aria-label="Connection and sync status"></button>
+    <button class="btn btn-ghost icon" id="themebtn" data-act="toggle-theme" aria-label="Toggle theme"></button>
+    <button class="btn btn-ghost icon bell" data-act="bell" aria-label="Notifications" aria-haspopup="true"><span data-i="bell"></span><em class="bcount" id="bellcount" hidden></em></button>
+    <button class="avatar" data-act="user" aria-label="Account and preferences" aria-haspopup="true">CG</button>
+   </div>
+  </header>
+  <div class="banner" id="banner"><span>Demonstration workspace. Data is simulated and stored only in this browser. GPS positions, customer approvals and AI output are demonstrations unless an integration is configured.</span><button class="btn btn-ghost btn-sm" data-act="hide-banner" aria-label="Dismiss">Dismiss</button></div>
+  <div id="views"></div>
+  <footer class="hxfoot"><div><b>Want a system like this?</b><span>Harxel Agency can build it for your business.</span></div><a href="#/harxel" data-nav="harxel">Book yours today →</a></footer>
+ </main>
+</div>
+<nav class="mnav" id="mnav" aria-label="Mobile"></nav>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="More"><div class="sheet-body" id="sheetbody"></div></div>
+<div class="menu" id="menu" role="menu"></div>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+ <header class="drawer-head"><div><h2 id="drawer-title"></h2><p id="drawer-sub"></p></div><button class="btn btn-ghost icon drawer-x" data-act="close-drawer" aria-label="Close panel"><span data-i="x"></span></button></header>
+ <div class="drawer-body" id="drawer-body"></div>
+ <footer class="drawer-foot" id="drawer-foot" hidden></footer>
+</aside>
+<div class="modalback" id="modal" role="dialog" aria-modal="true"><div class="modal" id="modalbody"></div></div>
+<div class="palette" id="palette" role="dialog" aria-modal="true" aria-label="Command bar"><div class="pal-box"><div class="pal-in"><span data-i="search"></span><input id="palq" placeholder="Search jobs, customers, workers or actions…" autocomplete="off" aria-label="Search"></div><div id="pallist" role="listbox"></div></div></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="v5-icons.js"></script>
+<script src="script.js"></script>
+<script src="v5-core.js"></script>
+<script src="v5-intel.js"></script>
+<script src="v5-ui.js"></script>
+<script src="v5-jobs.js"></script>
+<script src="v5-ops.js"></script>
+<script src="v5-field.js"></script>
+<script src="v5-business.js"></script>
+<script src="v5-boot.js"></script>
+</body>
+</html>
