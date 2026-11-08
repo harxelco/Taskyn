@@ -23,9 +23,20 @@ Opening `index.html` directly works too, but offline caching is disabled for `fi
 | `v5-ops.js` | Schedule, Team, Customers, Live Operations, Inventory, Equipment, Requests, Quotes, Invoices, Payments |
 | `v5-field.js` | Worker view (offline) and Customer portal (approval demo) |
 | `v5-business.js` | Reports & Analytics, Profitability, Taskyn AI, Notifications, Settings (roles, notifications, automations, integrations), Harxel |
+| `v5-docs.js` | PDF generation (jsPDF, loaded on demand), quote/invoice popups with WhatsApp/email sharing, Record payment, Record expense |
 | `v5-boot.js`, `sw.js`, `manifest.webmanifest`, `assets/` | Startup, service worker, PWA manifest, icon, bundled Inter font |
 
 V4's `v4.js`, `v4.css`, `styles.css` were folded into the files above (their views were rewritten on the new design system). Navigation: Services, Recurring, Analytics and Insights pages were merged into Jobs (templates + recurring), Reports and Taskyn AI so the sidebar is shorter (28 → 22 items). Old routes still redirect.
+
+## Added in this update
+- **Live Operations** uses a real street map (Leaflet + OpenStreetMap tiles, bundled in `assets/vendor/leaflet`; tiles need an internet connection) with job and worker markers; a Schematic toggle works offline. Google Maps is used instead if a key is set. Worker positions are simulated near their current job unless a worker shares real GPS from the Worker view; each marker is labelled accordingly.
+- **Accent colours** (Green, Blue, Red, Purple, Orange, Teal) from the account menu or Settings → Organisation, combined with light/dark/system. Every accent/theme pair was checked for WCAG contrast (button text, link text, sidebar) and a browser audit of all rendered text across 9 pages × 12 combinations found no failures.
+- **Profitability → Expenses:** record date, what it was, category, supplier, amount, method, reference, and optionally charge it to a job (reduces that job's profit) or leave it as an overhead (subtracted in Net profit).
+- **Quotes & Invoices:** click a row to open a popup with the details, totals, Save, Download PDF, Send to WhatsApp and Send to email. On phones the native share sheet opens with the PDF attached. Desktop browsers cannot attach files automatically, so the PDF downloads and WhatsApp/your email opens with the message pre-filled — attach the downloaded file and press send.
+- **Payments → Record payment:** date, client or payee, payment name, invoice link, amount, method, reference; supports payments received and payments made to suppliers.
+- **Dispatch:** Automatic (plan → review → confirm) or Manual (pick a worker from the ranked list and assign) — switch at the top of the page.
+- **Reports & Analytics:** View report (preview) and Save report (PDF).
+- **Harxel page:** shows the supplied logo, used unmodified (`assets/harxel-logo.png` is byte-identical to the upload; the page only frames it).
 
 ## What is real vs demo
 **Real, working in the browser:** every form validates; filters/search filter; costing maths is shared by all modules (`JC` in `v5-core.js`); automation rules actually run on assignment / delay / completion / report / low stock; the worker view queues actions in localStorage (photos in IndexedDB) and replays them in order; CSV/JSON export; theme; data persists per calendar day (configuration and templates persist indefinitely). Reset in Settings → Data.

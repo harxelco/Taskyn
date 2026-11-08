@@ -10,7 +10,7 @@
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/icon.svg">
 <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<script>try{var m=localStorage.getItem('taskyn.theme');m=m?JSON.parse(m):'auto';var d=m==='dark'||(m==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light'}catch(e){}</script>
+<script>try{var m=localStorage.getItem('taskyn.theme');m=m?JSON.parse(m):'auto';var d=m==='dark'||(m==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';var a=localStorage.getItem('taskyn.accent');if(a)document.documentElement.dataset.accent=JSON.parse(a)}catch(e){}</script>
 <link rel="stylesheet" href="v5.css">
 <script src="config.js"></script>
 </head>
@@ -62,6 +62,7 @@
 <script src="v5-ops.js"></script>
 <script src="v5-field.js"></script>
 <script src="v5-business.js"></script>
+<script src="v5-docs.js"></script>
 <script src="v5-boot.js"></script>
 </body>
 </html>

@@ -85,7 +85,7 @@ function addExpense(jobId,o){
  if(!['Labour','Material','Transport','Other'].includes(o.cat))return toast('Choose an expense category.','error'),false;
  if(!(amt>0))return toast('Enter an amount greater than zero.','error'),false;
  if(!desc)return toast('Add a short description.','error'),false;
- const e={id:uid('e'),cat:o.cat,desc,amt:Math.round(amt),t:nowStr(),by:S.role};
+ const e={id:uid('e'),cat:o.cat,desc,amt:Math.round(amt),t:nowStr(),by:S.role,date:o.date||isoOf(0),vendor:(o.vendor||'').trim(),method:o.method||'',ref:(o.ref||'').trim()};
  if(o.cat==='Material'&&o.stockId&&+o.qty>0){const s=D.stock.find(x=>x.id===o.stockId);if(s){e.stockId=s.id;e.qty=+o.qty;useStock(s,+o.qty,{job:j,by:'Manager'})}}
  j.expenses.push(e);log(j,`Expense recorded: ${o.cat} ${KES(e.amt)}`);commit();return true;
 }
@@ -162,7 +162,7 @@ function assignJob(j,wid,o={}){
  const t=teamById(wid),prev=j.assignee?teamById(j.assignee).name:null;
  j.assignee=wid;if(['Unassigned','Assigned'].includes(j.status)||o.reset)j.status='Assigned';
  log(j,prev&&prev!==t.name?`Reassigned from ${prev} to ${t.name} (manager approved)`:`Assigned to ${t.name} (manager approved)`);
- runRules('task_assigned',{job:j,worker:t});commit();toast(`${j.name} assigned to ${t.name}.`,'success');
+ runRules('task_assigned',{job:j,worker:t});commit();if(!o.quiet)toast(`${j.name} assigned to ${t.name}.`,'success');
 }
 function unassignJob(j){const p=j.assignee?teamById(j.assignee).name:'';j.assignee=null;j.status='Unassigned';log(j,'Unassigned from '+p);commit()}
 function reschedule(j,off,time){
@@ -282,7 +282,7 @@ function applyAction(a){
   case'check':j.proof.chk[p.k]=p.v;break;
   case'photo':j.proof.photos.push({id:p.pid,kind:p.kind,t:p.t,by:a.workerId});log(j,`${nm} added a ${p.kind} photo`);break;
   case'note':j.proof.notes.push({text:p.text,t:p.t,by:a.workerId});log(j,nm+' added a note');break;
-  case'material':{const s=D.stock.find(x=>x.id===p.stockId);j.proof.mats.push({item:p.item,qty:p.qty,u:p.u});if(s){useStock(s,p.qty,{job:j,by:w?.name});j.expenses.push({id:uid('e'),cat:'Material',desc:`${p.item} ×${p.qty}${p.u}`,amt:Math.round(s.cost*p.qty),stockId:s.id,qty:p.qty,t:p.t,by:w?.name})}log(j,`${nm} logged ${p.qty}${p.u} ${p.item}`);break}
+  case'material':{const s=D.stock.find(x=>x.id===p.stockId);j.proof.mats.push({item:p.item,qty:p.qty,u:p.u});if(s){useStock(s,p.qty,{job:j,by:w?.name});j.expenses.push({id:uid('e'),cat:'Material',desc:`${p.item} ×${p.qty}${p.u}`,amt:Math.round(s.cost*p.qty),stockId:s.id,qty:p.qty,t:p.t,by:w?.name,date:isoOf(0)})}log(j,`${nm} logged ${p.qty}${p.u} ${p.item}`);break}
   case'issue':j.issues.push({text:p.text,sev:p.sev,t:p.t,by:a.workerId});log(j,`${nm} reported an issue: ${p.text}`);addNotification(p.sev==='Blocking'?'red':'amber','Issue reported',`${w?.name||'Worker'} on ${j.name}: ${p.text}`,j.id,{to:'manager'});break;
   case'complete':{
    j.status='Awaiting Review';j.progress=100;j.missingReport=false;

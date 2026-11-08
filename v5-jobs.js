@@ -288,7 +288,7 @@ function restockDialog(id){const s=D.stock.find(x=>x.id===id);UI._rs=id;modalHTM
 SUB.restock=f=>{if(restock(UI._rs,f.q.value)){closeModal();toast('Stock updated.','success')}};
 
 /* ---------- SMART DISPATCH ---------- */
-const DS={day:0,focus:null,all:{},range:'day'};
+const DS={day:0,focus:null,all:{},range:'day',mode:LS.get('taskyn.dispmode')==='auto'?'auto':'manual'};
 function candHTML(j,r,rank,withBtn=true){
  const t=teamById(r.wid),pr=S.proposals.find(p=>p.jobId===j.id&&p.workerId===r.wid);
  const tot=r.parts.skill+r.parts.avail+r.parts.work+r.parts.zone||1;
@@ -297,14 +297,15 @@ function candHTML(j,r,rank,withBtn=true){
  <div class="why">${r.reasons.map(x=>`<span class="${x.ok?'ok':'no'}">${esc(x.txt)}</span>`).join('')}</div>
  <div class="parts" title="Skills ${r.parts.skill}/40 · Availability ${r.parts.avail}/25 · Workload ${r.parts.work}/25 · Area ${r.parts.zone}/10"><i style="width:${r.parts.skill/tot*100}%"></i><i style="width:${r.parts.avail/tot*100}%"></i><i style="width:${r.parts.work/tot*100}%"></i><i style="width:${r.parts.zone/tot*100}%"></i></div>
  ${r.conflicts.filter(c=>c.sev==='block').map(c=>`<div class="warn-line">${ic('alert')} ${esc(c.msg)}</div>`).join('')}</div>
- ${withBtn?`<div class="actions tight"><button class="btn ${pr?'btn-secondary':'btn-primary'} btn-sm" data-act="propose" data-job="${j.id}" data-w="${t.id}">${pr?'Proposed':'Propose'}</button></div>`:''}</div>`;
+ ${withBtn?(DS.mode==='manual'?`<div class="actions tight"><button class="btn btn-primary btn-sm" data-act="assign-now" data-job="${j.id}" data-w="${t.id}">Assign</button></div>`:`<div class="actions tight"><button class="btn ${pr?'btn-secondary':'btn-primary'} btn-sm" data-act="propose" data-job="${j.id}" data-w="${t.id}">${pr?'Proposed':'Propose'}</button></div>`):''}</div>`;
 }
 function dispatchQueue(){
  const off=DS.day,L=JOBS.filter(j=>j.status==='Unassigned'&&(DS.range==='week'?dayOff(j)>=0&&dayOff(j)<=7:dayOff(j)===off)).sort((a,b)=>dayOff(a)-dayOff(b)||jStart(a)-jStart(b));
  return L.map(j=>{const r=recommend(j),n=DS.all[j.id]?r.length:3,pend=S.proposals.find(p=>p.jobId===j.id);
   return`<div class="qcard ${DS.focus===j.id?'focus':''}" id="q${j.id}" draggable="true" data-drag="job:${j.id}"><div class="qhead"><div><h3>${jl(j)} ${j.priority!=='Normal'?pl(j.priority,j.priority==='Urgent'?'red':'amber'):''}</h3><span class="sub">${esc(cname(j))} · ${esc(j.location)} (${ZONE[j.location]}) · ${DS.range==='week'?dayLabel(dayOff(j))+' ':''}${hhmm(jStart(j))}–${hhmm(jEnd(j))} · ${(j.skills||[]).join(', ')||'any skill'}</span></div>${pend?pl('Pending approval','indigo'):''}</div>
-  ${r.slice(0,n).map((x,i)=>candHTML(j,x,i)).join('')}
-  <div class="actions"><button class="btn btn-ghost btn-sm" data-act="disp-all" data-id="${j.id}">${DS.all[j.id]?'Show top 3':'Show all workers'}</button></div></div>`}).join('')||empty('Nothing to assign',`Every job ${DS.range==='week'?'in the next 7 days':'on '+dayLabel(off).toLowerCase()} has a worker.`);
+  ${DS.mode==='auto'&&!DS.all[j.id]?candHTML(j,r[0],0,false):r.slice(0,n).map((x,i)=>candHTML(j,x,i)).join('')}
+  ${DS.mode==='manual'?`<div class="actions"><select id="pick${j.id}" aria-label="Choose a worker for ${esc(j.name)}" style="flex:1;min-width:160px">${r.map(x=>`<option value="${x.wid}">${esc(teamById(x.wid).name)} — score ${x.total}${x.block?' (conflict)':''}</option>`).join('')}</select><button class="btn btn-primary btn-sm" data-act="assign-pick" data-id="${j.id}">Assign selected worker</button></div>`:`<div class="actions"><button class="btn btn-primary btn-sm" data-act="auto-one" data-id="${j.id}">${ic('zap')} Auto-assign best worker</button><button class="btn btn-ghost btn-sm" data-act="disp-all" data-id="${j.id}">${DS.all[j.id]?'Show best only':'See other workers'}</button></div>`}
+  </div>`}).join('')||empty('Nothing to assign',`Every job ${DS.range==='week'?'in the next 7 days':'on '+dayLabel(off).toLowerCase()} has a worker.`);
 }
 function lanesHTML(){
  const off=DS.day,H0=7,H1=18,span=(H1-H0)*60;
@@ -325,20 +326,52 @@ render(p){
  if(p&&p.focus){DS.focus=p.focus;const j=jobById(p.focus);if(j)DS.day=Math.max(0,dayOff(j));UI.params={};}
  const off=DS.day,un=JOBS.filter(j=>j.status==='Unassigned'&&dayOff(j)===off).length;
  return`<div class="toolbar"><div class="tools"><button class="btn btn-secondary icon" data-act="disp-day" data-id="-1" aria-label="Previous day" ${off<=0?'disabled':''}>${ic('chevL')}</button><b style="min-width:150px;text-align:center">${dayLong(off)}</b><button class="btn btn-secondary icon" data-act="disp-day" data-id="1" aria-label="Next day">${ic('chevR')}</button>${off!==0?`<button class="btn btn-ghost btn-sm" data-act="disp-day" data-id="0">Today</button>`:''}</div>
-  <div class="tools">${seg([['day','This day'],['week','Next 7 days']],DS.range,'disp-range')}</div></div>
+  <div class="tools">${seg([['auto','Automatic'],['manual','Manual']],DS.mode,'disp-mode')}${seg([['day','This day'],['week','Next 7 days']],DS.range,'disp-range')}</div></div>
+ <div class="panel" style="padding:10px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><b>${DS.mode==='auto'?'Automatic dispatch':'Manual dispatch'}</b><div class="mut">${DS.mode==='auto'?'Taskyn picks the best available worker for each job. You review the plan, then confirm.':'You choose a worker from the list for each job — the score shows who fits best.'}</div></div>${DS.mode==='auto'?`<button class="btn btn-primary" data-act="auto-all" ${un?'':'disabled'}>${ic('zap')} Auto-dispatch ${un||''} job${un===1?'':'s'}</button>`:''}</div>
  <div id="disp-props">${proposalsHTML()}</div>
- <div class="row2" style="align-items:start"><div><div class="phead"><div><h3>Unassigned jobs <span class="pill ${un?'red':'green'}">${un}</span></h3><div class="sub">Drag a job onto a worker, or use Propose. ${isTouch()?'':'Drag works on desktop.'}</div></div></div><div id="disp-queue">${dispatchQueue()}</div></div>
+ <div class="row2" style="align-items:start"><div><div class="phead"><div><h3>Unassigned jobs <span class="pill ${un?'red':'green'}">${un}</span></h3><div class="sub">${DS.mode==='manual'?'Pick a worker below, or drag a job onto a worker.':'Use Auto-dispatch, or assign one job at a time.'} ${isTouch()?'':'Drag works on desktop.'}</div></div></div><div id="disp-queue">${dispatchQueue()}</div></div>
  <div class="panel"><div class="phead"><div><h3>Workers & workload</h3><div class="sub">Capacity 8h/day. Dashed blocks are proposals. Red = overlap.</div></div></div>${lanesHTML()}</div></div>
  <details class="panel"><summary style="cursor:pointer;font-weight:600">How the recommendation score works</summary><p class="mut" style="margin-top:8px">Score out of 100 = <b>skills 40</b> (has the skills the job needs) + <b>availability 25</b> (rostered, status, free in the time slot) + <b>workload 25</b> (hours already planned that day) + <b>service-area fit 10</b> (other jobs in the same or a neighbouring area). Overlapping jobs cap the score at 45. Areas are demo zones — <b>no GPS or road-distance data is used</b>. Recommendations are advice; every assignment needs your approval.</p></details>`},
 after(el){if(DS.focus){const q=document.getElementById('q'+DS.focus);q&&q.scrollIntoView({block:'center',behavior:'smooth'});DS.focus=null}}};
 const isTouch=()=>matchMedia('(pointer:coarse)').matches;
 Object.assign(ACT,{
  'disp-day':el=>{DS.day=Math.max(0,el.dataset.id==='0'?0:DS.day+ +el.dataset.id);paint('dispatch')},'disp-range':el=>{DS.range=el.dataset.id;paint('dispatch')},
+ 'disp-mode':el=>{DS.mode=el.dataset.id;LS.set('taskyn.dispmode',DS.mode);paint('dispatch')},'assign-now':el=>assignNow(+el.dataset.job,el.dataset.w),'assign-pick':el=>{const s=$('#pick'+el.dataset.id);assignNow(+el.dataset.id,s.value)},'auto-all':()=>autoReview(JOBS.filter(x=>x.status==='Unassigned'&&(DS.range==='week'?dayOff(x)>=0&&dayOff(x)<=7:dayOff(x)===DS.day))),'auto-one':el=>autoReview([jobById(+el.dataset.id)]),'auto-confirm':()=>autoConfirm(),
  'disp-all':el=>{DS.all[el.dataset.id]=!DS.all[el.dataset.id];region('#disp-queue',dispatchQueue())},
  propose:el=>{const jid=+el.dataset.job;propose(jid,el.dataset.w);if($('#drawer').classList.contains('open')){closeDrawer();goTo('dispatch',{focus:jid})}},'prop-ok':el=>approveProposal(el.dataset.id),'prop-no':el=>discardProposal(el.dataset.id),
  'prop-all':()=>{S.proposals.slice().forEach(p=>{if(!scoreFor(jobById(p.jobId),p.workerId).block)approveProposal(p.id)})}
 });
-DND.worker=(k,id,wid)=>{if(k!=='job')return;const j=jobById(+id);if(!j||CLOSED_ST.includes(j.status))return;if(j.assignee===wid)return;if(['On Site','In Progress'].includes(j.status))return toast('That job is already in progress — finish or cancel it first.','error');propose(j.id,wid)};
+DND.worker=(k,id,wid)=>{if(k!=='job')return;const j=jobById(+id);if(!j||CLOSED_ST.includes(j.status))return;if(j.assignee===wid)return;if(['On Site','In Progress'].includes(j.status))return toast('That job is already in progress — finish or cancel it first.','error');DS.mode==='manual'?assignNow(j.id,wid):propose(j.id,wid)};
 function reassignDrawer(id){
  const j=jobById(id);UI.drawer({title:'Find a worker',sub:`${esc(j.name)} · ${dayLabel(dayOff(j))} ${hhmm(jStart(j))}`,wide:1,render:()=>({body:`<p class="mut" style="margin-bottom:8px">Pick someone to propose. You will approve it in Dispatch before anything changes.</p>${recommend(j).map((r,i)=>candHTML(j,r,i)).join('')}`})});
+}
+
+/* manual dispatch: the manager's choice is the approval, so it assigns immediately (conflicts need an explicit override) */
+function assignNow(jobId,wid,force){
+ if(!guard('jobs.assign','assign jobs'))return;const j=jobById(jobId);if(!j||!wid)return;
+ const sc=scoreFor(j,wid);
+ if(sc.block&&!force)return UI.confirm(`<b>${esc(teamById(wid).name)}</b> has a schedule conflict:<br>${sc.conflicts.filter(c=>c.sev==='block').map(c=>esc(c.msg)).join('<br>')}<br><br>Assign anyway?`,()=>assignNow(jobId,wid,true),{label:'Assign anyway',danger:true});
+ S.proposals=S.proposals.filter(p=>p.jobId!==jobId);assignJob(j,wid);
+}
+/* automatic dispatch: plan with the same scoring, show the plan, assign only after one confirmation */
+let AUTO=null;
+function autoReview(list){
+ if(!guard('jobs.assign','assign jobs'))return;list=list.filter(Boolean);if(!list.length)return toast('No unassigned jobs to dispatch.','info');
+ const plan=[],skip=[],added=[];
+ list.slice().sort((a,b)=>['Urgent','High','Normal'].indexOf(a.priority)-['Urgent','High','Normal'].indexOf(b.priority)||dayOff(a)-dayOff(b)||jStart(a)-jStart(b)).forEach(x=>{
+  S.proposals=S.proposals.filter(p=>p.jobId!==x.id);
+  const r=recommend(x).find(c=>!c.block&&c.total>=50);
+  if(r){const p={id:uid('p'),jobId:x.id,workerId:r.wid,at:Date.now()};S.proposals.push(p);added.push(p.id);plan.push({j:x,r})}else skip.push(x)});
+ S.proposals=S.proposals.filter(p=>!added.includes(p.id));/* planning only — nothing is kept until you confirm */
+ AUTO={plan,skip};
+ if(!plan.length)return modalHTML(`${mhead('Automatic dispatch')}<p class="mtext">No worker is a good fit right now (a score of at least 50 with no schedule conflict is needed) for ${skip.length} job${skip.length>1?'s':''}. Use manual dispatch to choose someone.</p><div class="mactions"><button class="btn btn-primary" data-act="close-modal">OK</button></div>`);
+ modalHTML(`${mhead('Review automatic dispatch')}<p class="mtext">Taskyn will assign <b>${plan.length}</b> job${plan.length>1?'s':''}. Nothing changes until you confirm.</p>
+ <div style="margin-top:10px">${plan.map(({j:x,r})=>`<div class="qrow"><div><b>${esc(x.name)}</b> <span class="mut">${dayLabel(dayOff(x))} ${hhmm(jStart(x))}</span><small>→ ${esc(teamById(r.wid).name)} · score ${r.total}/100${r.conflicts.length?' · ⚠ '+esc(r.conflicts[0].msg):''}</small></div>${pl(r.total>=75?'Strong':'Fair',r.total>=75?'green':'amber')}</div>`).join('')}</div>
+ ${skip.length?`<p class="warn-line amber" style="margin-top:8px">${ic('alert')} ${skip.length} job${skip.length>1?'s':''} skipped (no free, suitable worker): ${skip.map(x=>esc(x.name)).join(', ')}. Assign these manually.</p>`:''}
+ <div class="mactions"><button class="btn btn-secondary" data-act="close-modal">Cancel</button><button class="btn btn-primary" data-act="auto-confirm">Assign ${plan.length} job${plan.length>1?'s':''}</button></div>`,true);
+}
+function autoConfirm(){
+ if(!AUTO)return;const {plan}=AUTO;AUTO=null;closeModal();let n=0,lost=0;
+ plan.forEach(({j:x,r})=>{if(x.status!=='Unassigned')return;if(scoreFor(x,r.wid).block){lost++;return}assignJob(x,r.wid,{quiet:true});n++});
+ commit();toast(`Auto-dispatched ${n} job${n!==1?'s':''}${lost?` (${lost} skipped because of new conflicts)`:''}.`,'success');
 }

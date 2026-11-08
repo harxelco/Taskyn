@@ -159,7 +159,7 @@ function seedCosting(j){
  if(j.charge==null){const t=TEMPLATES.find(x=>x.name===j.name);j.charge=SEED_CHARGE[j.name]??(t?t.price:6000+((j.id*7)%14)*1200)}
  if(j.status==='Cancelled'||j.expenses.length||j.progress<=0)return;
  const pf=j.progress>=100?1:j.progress/100,r=v=>Math.round(v/50)*50;
- [['Labour',.32,'Crew labour'],['Material',.12,'Materials'],['Transport',.06,'Transport'],['Other',.03,'Sundries']].forEach(([cat,k,d],i)=>j.expenses.push({id:'e'+j.id+'-'+i,cat,desc:d+' (demo seed)',amt:r(j.charge*k*pf),seed:true,t:'Seed'}));
+ [['Labour',.32,'Crew labour'],['Material',.12,'Materials'],['Transport',.06,'Transport'],['Other',.03,'Sundries']].forEach(([cat,k,d],i)=>j.expenses.push({id:'e'+j.id+'-'+i,cat,desc:d+' (demo seed)',amt:r(j.charge*k*pf),seed:true,t:'Seed',date:isoOf(dayOff(j))}));
 }
 JOBS.forEach(j=>{
  j.est=j.est??EST[j.name]??tplFor(j).hours;

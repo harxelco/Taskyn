@@ -147,14 +147,17 @@ function renderMenu(){
  const m=$('#menu'),kind=m.dataset.kind;
  if(kind==='bell'){const L=NOTIFICATIONS.filter(n=>/^(manager|supervisor)$/.test(n.to||'manager')).slice(0,6);
   m.innerHTML=`<div class="mn-head"><b>Notifications</b><button class="btn btn-ghost btn-sm" data-act="read-all">Mark all read</button></div>${L.map(n=>`<button class="mn-item ${n.read?'':'unread'}" data-act="open-notif" data-id="${n.id}"><i class="dot ${n.type}"></i><span><b>${esc(n.title)}</b><small>${esc(n.msg)}</small></span></button>`).join('')||'<p class="mn-empty">No notifications.</p>'}<button class="mn-foot" data-nav="notifications">View all notifications</button>`}
- else if(kind==='user'){m.innerHTML=`<div class="mn-head"><b>${esc(S.org.name)}</b><span class="pill gray">Demo</span></div><div class="mn-sec">Preview as role</div>${Object.keys(S.roles).map(r=>`<button class="mn-item" data-act="set-role" data-id="${r}"><span><b>${r}</b></span>${S.role===r?ic('check'):''}</button>`).join('')}<div class="mn-sec">Appearance</div>${[['auto','System'],['light','Light'],['dark','Dark']].map(([v,l])=>`<button class="mn-item" data-act="theme" data-id="${v}"><span><b>${l}</b></span>${(LS.get('taskyn.theme')||'auto')===v?ic('check'):''}</button>`).join('')}<button class="mn-foot" data-nav="settings">Settings</button>`}
+ else if(kind==='user'){m.innerHTML=`<div class="mn-head"><b>${esc(S.org.name)}</b><span class="pill gray">Demo</span></div><div class="mn-sec">Preview as role</div>${Object.keys(S.roles).map(r=>`<button class="mn-item" data-act="set-role" data-id="${r}"><span><b>${r}</b></span>${S.role===r?ic('check'):''}</button>`).join('')}<div class="mn-sec">Appearance</div>${[['auto','System'],['light','Light'],['dark','Dark']].map(([v,l])=>`<button class="mn-item" data-act="theme" data-id="${v}"><span><b>${l}</b></span>${(LS.get('taskyn.theme')||'auto')===v?ic('check'):''}</button>`).join('')}<div class="mn-sec">Accent colour</div><div class="mn-sw" role="radiogroup" aria-label="Accent colour">${ACCENTS.map(([k,l,c])=>`<button style="background:${c}" role="radio" aria-checked="${curAccent()===k}" aria-label="${l}" title="${l}" data-act="accent" data-id="${k}"></button>`).join('')}</div><button class="mn-foot" data-nav="settings">Settings</button>`}
  hydrate(m);
 }
 function openMenu(kind,anchor){const m=$('#menu');if(m.classList.contains('show')&&m.dataset.kind===kind){closeMenus();return}m.dataset.kind=kind;renderMenu();const r=anchor.getBoundingClientRect();m.style.top=(r.bottom+8)+'px';m.style.right=Math.max(8,window.innerWidth-r.right)+'px';m.classList.add('show')}
 
 /* ---------- theme ---------- */
+const ACCENTS=[['green','Green','#1f6b45'],['blue','Blue','#1d5fb8'],['red','Red','#c0392b'],['purple','Purple','#6b46c1'],['orange','Orange','#c2540a'],['teal','Teal','#0f766e']];
 function setTheme(mode){LS.set('taskyn.theme',mode);applyTheme();}
-function applyTheme(){const m=LS.get('taskyn.theme')||'auto',dark=m==='dark'||m==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.theme=dark?'dark':'light';const b=$('#themebtn');if(b){b.innerHTML=ic(dark?'sun':'moon');b.setAttribute('aria-label',dark?'Switch to light theme':'Switch to dark theme')}const tc=document.querySelector('meta[name=theme-color]');if(tc)tc.content=dark?'#0e1411':'#f6f8f6'}
+function setAccent(a){LS.set('taskyn.accent',a);applyTheme();if($('#menu.show'))renderMenu()}
+const curAccent=()=>{const a=LS.get('taskyn.accent');return ACCENTS.some(x=>x[0]===a)?a:'green'}
+function applyTheme(){const m=LS.get('taskyn.theme')||'auto',dark=m==='dark'||m==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.theme=dark?'dark':'light';document.documentElement.dataset.accent=curAccent();const b=$('#themebtn');if(b){b.innerHTML=ic(dark?'sun':'moon');b.setAttribute('aria-label',dark?'Switch to light theme':'Switch to dark theme')}const tc=document.querySelector('meta[name=theme-color]');if(tc)tc.content=dark?'#0e1411':'#f6f8f6'}
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);
 
 /* ---------- command bar (actions + live search of jobs, customers, workers) ---------- */
@@ -188,7 +191,7 @@ Object.assign(ACT,{
  retry:()=>paint(UI.cur),sheet:()=>$('#sheet').classList.add('show'),
  palette:()=>openPalette(),'pal-run':el=>{const f=PAL.items[+el.dataset.i].f;closePalette();f()},
  bell:el=>openMenu('bell',el),user:el=>openMenu('user',el),'toggle-theme':()=>{setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark')},
- theme:el=>{setTheme(el.dataset.id);renderMenu()},'set-role':el=>{S.role=el.dataset.id;commit();toast('Previewing the app as '+S.role+'.','info')},
+ theme:el=>{setTheme(el.dataset.id);renderMenu();if(UI.cur==='settings')paint('settings')},accent:el=>{setAccent(el.dataset.id);if(UI.cur==='settings')paint('settings');toast(el.dataset.id[0].toUpperCase()+el.dataset.id.slice(1)+' accent applied.','success')},'set-role':el=>{S.role=el.dataset.id;commit();toast('Previewing the app as '+S.role+'.','info')},
  'read-all':()=>{NOTIFICATIONS.forEach(n=>n.read=true);commit();toast('All notifications marked as read.','success')},
  'open-notif':el=>{openNotif(+el.dataset.id)},
  'collapse':()=>{const c=$('#app').classList.toggle('collapsed');LS.set('taskyn.collapsed',c)},
